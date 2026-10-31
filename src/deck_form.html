@@ -1,0 +1,38 @@
+{{ define "body"}} 
+
+<div class="h5 bg-primary text-white text-center m-2 p-2">Create Deck</div>
+
+{{ if gt (len .Errors) 0}}
+    <ul class="text-danger mt-3">
+        {{ range .Errors }}
+            <li>{{ .  }}</li>
+        {{ end }}
+    </ul>
+{{ end }}
+
+<form method="POST" class="m-2">
+    <div class="form-group my-1">
+        <label>Deck name:</label>
+        <input name="name" class="form-control" value="{{.Name}}" />
+    </div>
+    <div class="form-group my-1">
+        <label>Deck description:</label>
+        <input name="description" class="form-control" value="{{.Description}}" />
+    </div>
+    <div class="form-group my-1">
+        <label>Is Deck active?</label>
+        <select name="isactive" class="form-select">
+            <option value="true" {{if .IsActive}}selected{{end}}>
+                Yes, deck is active
+            </option>
+            <option value="false" {{if not .IsActive}}selected{{end}}>
+                No, Deck is not active
+            </option>
+        </select>
+    </div>
+    <button class="btn btn-primary mt-3" type="submit">
+        Submit
+    </button>
+</form>
+
+{{ end }}

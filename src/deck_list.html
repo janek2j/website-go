@@ -1,0 +1,21 @@
+{{ define "body"}} 
+
+<div class="text-center p-2">
+    <h2>Here is the list of your decks of cards</h2>
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr><th>Deck Name</th><th>Description</th><th>Is Active?</th></tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+                    <tr>
+                        <td>{{ .Name }}</td>
+                        <td>{{ .Description }}</td>
+                        <td>{{ .IsActive }}</td>
+                    </tr>    
+            {{ end }}
+        </tbody>
+    </table>
+</div>
+
+{{ end }}

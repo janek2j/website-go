@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Website</title>
+    <link href=
+       "https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.1/css/bootstrap.min.css" 
+            rel="stylesheet">
+</head>
+<body class="p-2">
+        <p><h4>
+            Menu:
+            <a href="http://127.0.0.1:5000/">/ (Welcome)</a>|
+            <a href="http://127.0.0.1:5000/decks">/decks</a>|
+            <a href="http://127.0.0.1:5000/cards">/cards</a>|
+            <a href="http://127.0.0.1:5000/deck_form">/deck_form</a>|
+            <a href="http://127.0.0.1:5000/about">/about</a>|
+        </h4></p>
+    {{ block "body" . }} Content Goes Here {{ end }}
+</body>
+</html>
