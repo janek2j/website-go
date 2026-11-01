@@ -1,17 +1,16 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
-)
 
-const portNumber = ":5000" // in ":nnnn" format
+	"github.com/janek2j/website-go/pkg/render"
+)
 
 type User struct {
 	Name  string
@@ -26,19 +25,19 @@ type Item struct {
 	IsForRent   bool    `json:"rentable"`
 }
 
+type homeData struct {
+	PresentTime   string
+	PresentRandom int
+}
+
 type formDataForUser struct {
 	*User
 	Errors []string
 }
 
-type formDataForUserForItem struct {
+type formDataForItem struct {
 	*Item
 	Errors []string
-}
-
-type homeData struct {
-	PresentTime   string
-	PresentRandom int
 }
 
 type AppUser struct {
@@ -46,12 +45,10 @@ type AppUser struct {
 	Email string `json:"email"`
 }
 
+var home = homeData{time.Now().String(), rand.Intn(6) + 1}
+
 var users = make([]*User, 0, 10)
 var items = make([]*Item, 0, 10)
-
-var welcome = homeData{time.Now().String(), rand.Intn(6) + 1}
-
-var templates = make(map[string]*template.Template, 3)
 
 // Populate fills User and Item collections with some initial data
 func Populate() {
@@ -96,34 +93,26 @@ func Populate() {
 
 }
 
-func loadTemplates() {
-	templateNames := [5]string{"welcome", "user_list", "item_list", "user_form", "item_form"}
-	for index, name := range templateNames {
-		t, err := template.ParseFiles("layout.html", name+".html")
-		if err == nil {
-			templates[name] = t
-			log.Println("Loaded template", index, name)
-		} else {
-			panic(err)
-		}
-	}
+func HomeHandler(writer http.ResponseWriter, request *http.Request) {
+	render.Templates["home"].Execute(writer, home)
 }
 
-func homeHandler(writer http.ResponseWriter, request *http.Request) {
-	templates["welcome"].Execute(writer, welcome)
+// AboutHandler is the about page handler
+func AboutHandler(writer http.ResponseWriter, request *http.Request) {
+	render.Templates["about"].Execute(writer, nil)
 }
 
-func userHandler(writer http.ResponseWriter, request *http.Request) {
-	templates["user_list"].Execute(writer, users)
+func UserHandler(writer http.ResponseWriter, request *http.Request) {
+	render.Templates["user_list"].Execute(writer, users)
 }
 
-func itemHandler(writer http.ResponseWriter, request *http.Request) {
-	templates["item_list"].Execute(writer, items)
+func ItemHandler(writer http.ResponseWriter, request *http.Request) {
+	render.Templates["item_list"].Execute(writer, items)
 }
 
-func item_formHandler(writer http.ResponseWriter, request *http.Request) {
+func Item_formHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == http.MethodGet {
-		templates["item_form"].Execute(writer, formDataForUserForItem{
+		render.Templates["item_form"].Execute(writer, formDataForItem{
 			Item: &Item{}, Errors: []string{},
 		})
 	} else if request.Method == http.MethodPost {
@@ -152,21 +141,21 @@ func item_formHandler(writer http.ResponseWriter, request *http.Request) {
 			errors = append(errors, "Please enter non-negative item price/value")
 		}
 		if len(errors) > 0 {
-			templates["item_form"].Execute(writer, formDataForUserForItem{
+			render.Templates["item_form"].Execute(writer, formDataForItem{
 				Item:   &responseData,
 				Errors: errors,
 			})
 		} else {
 			items = append(items, &responseData)
-			templates["item_list"].Execute(writer, items)
+			render.Templates["item_list"].Execute(writer, items)
 		}
 
 	}
 }
 
-func user_formHandler(writer http.ResponseWriter, request *http.Request) {
+func User_formHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == http.MethodGet {
-		templates["user_form"].Execute(writer, formDataForUser{
+		render.Templates["user_form"].Execute(writer, formDataForUser{
 			User: &User{}, Errors: []string{},
 		})
 	} else if request.Method == http.MethodPost {
@@ -184,12 +173,12 @@ func user_formHandler(writer http.ResponseWriter, request *http.Request) {
 			errors = append(errors, "Please enter email")
 		}
 		if len(errors) > 0 {
-			templates["user_form"].Execute(writer, formDataForUser{
+			render.Templates["user_form"].Execute(writer, formDataForUser{
 				User: &responseData, Errors: errors,
 			})
 		} else {
 			users = append(users, &responseData)
-			templates["user_list"].Execute(writer, users)
+			render.Templates["user_list"].Execute(writer, users)
 		}
 	}
 }
@@ -198,8 +187,7 @@ func addValues(x, y int) int {
 	return x + y
 }
 
-// aboutHandler is the about page handler
-func aboutHandler(writer http.ResponseWriter, request *http.Request) {
+func OtherHandler(writer http.ResponseWriter, request *http.Request) {
 	sum := addValues(2, 3)
 
 	n, err := fmt.Fprintf(writer, "<h1>About</h1>")
@@ -208,22 +196,4 @@ func aboutHandler(writer http.ResponseWriter, request *http.Request) {
 		log.Println(err)
 	}
 	log.Printf("Number of bytes written: %d", n)
-}
-
-func main() {
-	Populate()
-	loadTemplates()
-
-	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/users", userHandler)
-	http.HandleFunc("/user_form", user_formHandler)
-	http.HandleFunc("/items", itemHandler)
-	http.HandleFunc("/item_form", item_formHandler)
-	http.HandleFunc("/about", aboutHandler)
-
-	fmt.Printf("Starting application on port %s", portNumber)
-	err := http.ListenAndServe(portNumber, nil)
-	if err != nil {
-		fmt.Println(err)
-	}
 }
