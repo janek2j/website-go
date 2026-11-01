@@ -1,17 +1,19 @@
 {{ define "body"}} 
 
 <div class="text-center p-2">
-    <h2>Here is the list of your decks of cards</h2>
+    <h2>Here is the list of your items</h2>
     <table class="table table-bordered table-striped table-sm">
         <thead>
-            <tr><th>Deck Name</th><th>Description</th><th>Is Active?</th></tr>
+            <tr><th>Name</th><th>Category</th><th>Description</th><th>Price</th><th>Is For Rent?</th></tr>
         </thead>
         <tbody>
             {{ range . }}
                     <tr>
                         <td>{{ .Name }}</td>
+                        <td>{{ .Category }}</td>
                         <td>{{ .Description }}</td>
-                        <td>{{ .IsActive }}</td>
+                        <td>{{ .Price }}</td>
+                        <td>{{ .IsForRent }}</td>
                     </tr>    
             {{ end }}
         </tbody>

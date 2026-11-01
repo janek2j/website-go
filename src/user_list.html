@@ -1,17 +1,16 @@
 {{ define "body"}} 
 
 <div class="text-center p-2">
-    <h2>Here is the list of your cards</h2>
+    <h2>Here is the list of users</h2>
     <table class="table table-bordered table-striped table-sm">
         <thead>
-            <tr><th>Front</th><th>Back</th><th>Level</th></tr>
+            <tr><th>User Name</th><th>Email</th></tr>
         </thead>
         <tbody>
             {{ range . }}
                     <tr>
-                        <td>{{ .Front }}</td>
-                        <td>{{ .Back }}</td>
-                        <td>{{ .Level }}</td>
+                        <td>{{ .Name }}</td>
+                        <td>{{ .Email }}</td>
                     </tr>    
             {{ end }}
         </tbody>
