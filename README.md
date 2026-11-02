@@ -1,1 +1,1 @@
-# website-go
+# Simple web app for renting things

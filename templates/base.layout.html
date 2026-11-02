@@ -1,0 +1,33 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    {{ block "css" . }}
+
+    {{ end }}
+</head>
+<body class="p-2">
+        <p><h4>
+            Menu:
+            <a href="http://127.0.0.1:8080/">/ (Home)</a>|
+            <a href="http://127.0.0.1:8080/users">/users</a>|
+            <!-- <a href="http://127.0.0.1:8080/user_form">/user_form</a>| -->
+            <!-- <a href="http://127.0.0.1:8080/item_form">/item_form</a>| -->
+            <a href="http://127.0.0.1:8080/items">/items</a>|
+            <a href="http://127.0.0.1:8080/about">/about</a>|
+        </h4></p>
+    {{ block "content" . }}
+        
+    {{ end }}
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> -->
+     
+    {{ block "js" . }}
+
+     {{ end }}
+</body>
+</html>
+{{ end }}

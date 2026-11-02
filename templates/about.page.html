@@ -1,8 +1,13 @@
-{{ define "body"}}
+{{template "base" .}}
+
+{{ define "content"}}
  <div class="container">
         <div class="row">
             <div class="col">
                 <h3>This is about page</h3>
+                <p>Testing data from template:
+                    {{index .StringMap "test"}}
+                </p>
             </div>
         </div>
     </div>

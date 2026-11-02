@@ -6,11 +6,32 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 
+	"github.com/janek2j/website-go/pkg/config"
+	"github.com/janek2j/website-go/pkg/models"
 	"github.com/janek2j/website-go/pkg/render"
 )
+
+// Repo is the repository used by the handlers
+var Repo *Repository
+
+// Repository is the repository type
+type Repository struct {
+	App *config.AppConfig // holds the application config
+}
+
+// NewRepo creates a new repository
+func NewRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+	}
+}
+
+// NewHandlers sets the repository for the handlers
+func NewHandlers(r *Repository) {
+	Repo = r
+}
 
 type User struct {
 	Name  string
@@ -93,95 +114,100 @@ func Populate() {
 
 }
 
-func HomeHandler(writer http.ResponseWriter, request *http.Request) {
-	render.Templates["home"].Execute(writer, home)
+func (m *Repository) HomeHandler(writer http.ResponseWriter, request *http.Request) {
+	render.RenderTemplate(writer, "home.page.html", &models.TemplateData{})
 }
 
 // AboutHandler is the about page handler
-func AboutHandler(writer http.ResponseWriter, request *http.Request) {
-	render.Templates["about"].Execute(writer, nil)
+func (m *Repository) AboutHandler(writer http.ResponseWriter, request *http.Request) {
+
+	stringMap := make(map[string]string)
+	stringMap["test"] = "Testing template data"
+	render.RenderTemplate(writer, "about.page.html", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }
 
 func UserHandler(writer http.ResponseWriter, request *http.Request) {
-	render.Templates["user_list"].Execute(writer, users)
+	render.RenderTemplate(writer, "user_list.page.html", &models.TemplateData{})
 }
 
 func ItemHandler(writer http.ResponseWriter, request *http.Request) {
-	render.Templates["item_list"].Execute(writer, items)
+	render.RenderTemplate(writer, "item_list.page.html", &models.TemplateData{})
 }
 
-func Item_formHandler(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == http.MethodGet {
-		render.Templates["item_form"].Execute(writer, formDataForItem{
-			Item: &Item{}, Errors: []string{},
-		})
-	} else if request.Method == http.MethodPost {
-		request.ParseForm()
+// func Item_formHandler(writer http.ResponseWriter, request *http.Request) {
+// 	if request.Method == http.MethodGet {
+// 		render.Templates["item_form.page"].Execute(writer, formDataForItem{
+// 			Item: &Item{}, Errors: []string{},
+// 		})
+// 	} else if request.Method == http.MethodPost {
+// 		request.ParseForm()
 
-		parsed_price, _ := strconv.ParseFloat(request.Form["price"][0], 32)
-		responseData := Item{
-			Name:        request.Form["name"][0],
-			Category:    request.Form["category"][0],
-			Description: request.Form["description"][0],
-			Price:       float32(parsed_price),
-			IsForRent:   request.Form["isForRent"][0] == "true",
-		}
+// 		parsed_price, _ := strconv.ParseFloat(request.Form["price"][0], 32)
+// 		responseData := Item{
+// 			Name:        request.Form["name"][0],
+// 			Category:    request.Form["category"][0],
+// 			Description: request.Form["description"][0],
+// 			Price:       float32(parsed_price),
+// 			IsForRent:   request.Form["isForRent"][0] == "true",
+// 		}
 
-		errors := []string{}
-		if responseData.Name == "" {
-			errors = append(errors, "Please enter item name")
-		}
-		if responseData.Description == "" {
-			errors = append(errors, "Please enter some description")
-		}
-		if responseData.Category == "" {
-			errors = append(errors, "Please enter item category")
-		}
-		if responseData.Price < 0 {
-			errors = append(errors, "Please enter non-negative item price/value")
-		}
-		if len(errors) > 0 {
-			render.Templates["item_form"].Execute(writer, formDataForItem{
-				Item:   &responseData,
-				Errors: errors,
-			})
-		} else {
-			items = append(items, &responseData)
-			render.Templates["item_list"].Execute(writer, items)
-		}
+// 		errors := []string{}
+// 		if responseData.Name == "" {
+// 			errors = append(errors, "Please enter item name")
+// 		}
+// 		if responseData.Description == "" {
+// 			errors = append(errors, "Please enter some description")
+// 		}
+// 		if responseData.Category == "" {
+// 			errors = append(errors, "Please enter item category")
+// 		}
+// 		if responseData.Price < 0 {
+// 			errors = append(errors, "Please enter non-negative item price/value")
+// 		}
+// 		if len(errors) > 0 {
+// 			render.Templates["item_form.page"].Execute(writer, formDataForItem{
+// 				Item:   &responseData,
+// 				Errors: errors,
+// 			})
+// 		} else {
+// 			items = append(items, &responseData)
+// 			render.Templates["item_list.page"].Execute(writer, items)
+// 		}
 
-	}
-}
+// 	}
+// }
 
-func User_formHandler(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == http.MethodGet {
-		render.Templates["user_form"].Execute(writer, formDataForUser{
-			User: &User{}, Errors: []string{},
-		})
-	} else if request.Method == http.MethodPost {
-		request.ParseForm()
-		responseData := User{
-			Name:  request.Form["name"][0],
-			Email: request.Form["email"][0],
-		}
+// func User_formHandler(writer http.ResponseWriter, request *http.Request) {
+// 	if request.Method == http.MethodGet {
+// 		render.Templates["user_form.page"].Execute(writer, formDataForUser{
+// 			User: &User{}, Errors: []string{},
+// 		})
+// 	} else if request.Method == http.MethodPost {
+// 		request.ParseForm()
+// 		responseData := User{
+// 			Name:  request.Form["name"][0],
+// 			Email: request.Form["email"][0],
+// 		}
 
-		errors := []string{}
-		if responseData.Name == "" {
-			errors = append(errors, "Please enter user name")
-		}
-		if responseData.Email == "" {
-			errors = append(errors, "Please enter email")
-		}
-		if len(errors) > 0 {
-			render.Templates["user_form"].Execute(writer, formDataForUser{
-				User: &responseData, Errors: errors,
-			})
-		} else {
-			users = append(users, &responseData)
-			render.Templates["user_list"].Execute(writer, users)
-		}
-	}
-}
+// 		errors := []string{}
+// 		if responseData.Name == "" {
+// 			errors = append(errors, "Please enter user name")
+// 		}
+// 		if responseData.Email == "" {
+// 			errors = append(errors, "Please enter email")
+// 		}
+// 		if len(errors) > 0 {
+// 			render.Templates["user_form"].Execute(writer, formDataForUser{
+// 				User: &responseData, Errors: errors,
+// 			})
+// 		} else {
+// 			users = append(users, &responseData)
+// 			render.Templates["user_list"].Execute(writer, users)
+// 		}
+// 	}
+// }
 
 func addValues(x, y int) int {
 	return x + y
