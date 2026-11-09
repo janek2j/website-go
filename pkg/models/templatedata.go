@@ -11,3 +11,6 @@ type TemplateData struct {
 	Warning   string
 	Error     string
 }
+
+type RentalTemplateData struct {
+}

@@ -13,24 +13,24 @@ import (
 	"github.com/janek2j/website-go/pkg/render"
 )
 
-// Repo is the repository used by the handlers
-var Repo *Repository
+// CfgRepo is the repository used by the handlers
+var CfgRepo *ConfigRepository
 
-// Repository is the repository type
-type Repository struct {
+// ConfigRepository is the repository type
+type ConfigRepository struct {
 	App *config.AppConfig // holds the application config
 }
 
 // NewRepo creates a new repository
-func NewRepo(a *config.AppConfig) *Repository {
-	return &Repository{
+func NewRepo(a *config.AppConfig) *ConfigRepository {
+	return &ConfigRepository{
 		App: a,
 	}
 }
 
 // NewHandlers sets the repository for the handlers
-func NewHandlers(r *Repository) {
-	Repo = r
+func NewHandlers(r *ConfigRepository) {
+	CfgRepo = r
 }
 
 type User struct {
@@ -114,43 +114,64 @@ func Populate() {
 
 }
 
-func (m *Repository) HomeHandler(writer http.ResponseWriter, request *http.Request) {
-	render.RenderTemplate(writer, "home.page.html", &models.TemplateData{})
+func (m *ConfigRepository) HomeHandler(w http.ResponseWriter, r *http.Request) {
+
+	remoteIP := r.RemoteAddr
+	// req := strconv.FormatInt(r.ContentLength+10, 10)
+	req := string(r.ContentLength + 74)
+	fmt.Println("req:", req)
+
+	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
+	m.App.Session.Put(r.Context(), "req", req)
+
+	render.RenderTemplate(w, "home.page.html", &models.TemplateData{
+		StringMap: map[string]string{
+			"PresentRandom": "999999",
+		},
+	})
 }
 
 // AboutHandler is the about page handler
-func (m *Repository) AboutHandler(writer http.ResponseWriter, request *http.Request) {
+func (m *ConfigRepository) AboutHandler(w http.ResponseWriter, r *http.Request) {
 
 	stringMap := make(map[string]string)
 	stringMap["test"] = "Testing template data"
-	render.RenderTemplate(writer, "about.page.html", &models.TemplateData{
+
+	stringMap["remote_ip"] = m.App.Session.GetString(r.Context(), "remote_ip")
+	stringMap["req"] = m.App.Session.GetString(r.Context(), "req")
+
+	render.RenderTemplate(w, "about.page.html", &models.TemplateData{
 		StringMap: stringMap,
 	})
 }
 
-func UserHandler(writer http.ResponseWriter, request *http.Request) {
-	render.RenderTemplate(writer, "user_list.page.html", &models.TemplateData{})
+func UserHandler(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "user_list.page.html", &models.TemplateData{})
 }
 
-func ItemHandler(writer http.ResponseWriter, request *http.Request) {
-	render.RenderTemplate(writer, "item_list.page.html", &models.TemplateData{})
+func ItemHandler(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "item_list.page.html", &models.TemplateData{})
 }
 
-// func Item_formHandler(writer http.ResponseWriter, request *http.Request) {
-// 	if request.Method == http.MethodGet {
-// 		render.Templates["item_form.page"].Execute(writer, formDataForItem{
+func RentalHandler(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "rental_list.page.html", &models.TemplateData{})
+}
+
+// func Item_formHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method == http.MethodGet {
+// 		render.Templates["item_form.page"].Execute(w, formDataForItem{
 // 			Item: &Item{}, Errors: []string{},
 // 		})
-// 	} else if request.Method == http.MethodPost {
-// 		request.ParseForm()
+// 	} else if r.Method == http.MethodPost {
+// 		r.ParseForm()
 
-// 		parsed_price, _ := strconv.ParseFloat(request.Form["price"][0], 32)
+// 		parsed_price, _ := strconv.ParseFloat(r.Form["price"][0], 32)
 // 		responseData := Item{
-// 			Name:        request.Form["name"][0],
-// 			Category:    request.Form["category"][0],
-// 			Description: request.Form["description"][0],
+// 			Name:        r.Form["name"][0],
+// 			Category:    r.Form["category"][0],
+// 			Description: r.Form["description"][0],
 // 			Price:       float32(parsed_price),
-// 			IsForRent:   request.Form["isForRent"][0] == "true",
+// 			IsForRent:   r.Form["isForRent"][0] == "true",
 // 		}
 
 // 		errors := []string{}
@@ -167,28 +188,28 @@ func ItemHandler(writer http.ResponseWriter, request *http.Request) {
 // 			errors = append(errors, "Please enter non-negative item price/value")
 // 		}
 // 		if len(errors) > 0 {
-// 			render.Templates["item_form.page"].Execute(writer, formDataForItem{
+// 			render.Templates["item_form.page"].Execute(w, formDataForItem{
 // 				Item:   &responseData,
 // 				Errors: errors,
 // 			})
 // 		} else {
 // 			items = append(items, &responseData)
-// 			render.Templates["item_list.page"].Execute(writer, items)
+// 			render.Templates["item_list.page"].Execute(w, items)
 // 		}
 
 // 	}
 // }
 
-// func User_formHandler(writer http.ResponseWriter, request *http.Request) {
-// 	if request.Method == http.MethodGet {
-// 		render.Templates["user_form.page"].Execute(writer, formDataForUser{
+// func User_formHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method == http.MethodGet {
+// 		render.Templates["user_form.page"].Execute(w, formDataForUser{
 // 			User: &User{}, Errors: []string{},
 // 		})
-// 	} else if request.Method == http.MethodPost {
-// 		request.ParseForm()
+// 	} else if r.Method == http.MethodPost {
+// 		r.ParseForm()
 // 		responseData := User{
-// 			Name:  request.Form["name"][0],
-// 			Email: request.Form["email"][0],
+// 			Name:  r.Form["name"][0],
+// 			Email: r.Form["email"][0],
 // 		}
 
 // 		errors := []string{}
@@ -199,12 +220,12 @@ func ItemHandler(writer http.ResponseWriter, request *http.Request) {
 // 			errors = append(errors, "Please enter email")
 // 		}
 // 		if len(errors) > 0 {
-// 			render.Templates["user_form"].Execute(writer, formDataForUser{
+// 			render.Templates["user_form"].Execute(w, formDataForUser{
 // 				User: &responseData, Errors: errors,
 // 			})
 // 		} else {
 // 			users = append(users, &responseData)
-// 			render.Templates["user_list"].Execute(writer, users)
+// 			render.Templates["user_list"].Execute(w, users)
 // 		}
 // 	}
 // }
@@ -213,11 +234,11 @@ func addValues(x, y int) int {
 	return x + y
 }
 
-func OtherHandler(writer http.ResponseWriter, request *http.Request) {
+func OtherHandler(w http.ResponseWriter, r *http.Request) {
 	sum := addValues(2, 3)
 
-	n, err := fmt.Fprintf(writer, "<h1>About</h1>")
-	_, _ = fmt.Fprintf(writer, fmt.Sprintf("The sum is %d", sum))
+	n, err := fmt.Fprintf(w, "<h1>About</h1>")
+	_, _ = fmt.Fprintf(w, fmt.Sprintf("The sum is %d", sum))
 	if err != nil {
 		log.Println(err)
 	}

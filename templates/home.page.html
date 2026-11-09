@@ -1,8 +1,7 @@
 {{template "base" .}}
 
 {{ define "content"}} 
-    Present time: {{ .PresentTime }}
-    Present random: {{ .PresentRandom }}
+    Present random: {{index .StringMap "PresentRandom" }}
     <div class="container">
         <div class="row">
             <div class="col">

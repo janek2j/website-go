@@ -8,6 +8,14 @@
                 <p>Testing data from template:
                     {{index .StringMap "test"}}
                 </p>
+                <h4>
+                    {{ if ne (index .StringMap "remote_ip") ""}}
+                        Your IP address (from session memory) is: {{index .StringMap "remote_ip"}}
+                    {{else}}
+                        I don't know your IP address. Visit Home first then come back here.
+                    {{end}}
+                    <br/>REQ: [{{index .StringMap "req"}}]
+                </h4>
             </div>
         </div>
     </div>

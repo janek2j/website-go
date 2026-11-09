@@ -1,0 +1,33 @@
+{{ template "base" .}}
+
+{{ define "content"}} 
+
+<div class="text-center p-2">
+    <h2>Here is the list of rentals</h2>
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr><th>Product Id</th>
+            <th>Lender Id</th>
+            <th>Borrower Id</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Picture</th>
+        </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+                <tr>
+                    <td>{{ .ProductId }}</td>
+                    <td>{{ .LenderId }}</td>
+                    <td>{{ .BorrowerId }}</td>
+                    <td>{{ .StartDate }}</td>
+                    <td>{{ .EndDate }}</td>
+                    <td>{{ .PickupDate }}</td>
+                    <td>{{ .PickupLocation }}</td>
+                    <td>{{ .PictureUrl }}</td>
+                </tr>    
+            {{ end }}
+        </tbody>
+    </table>
+</div>
+{{ end }}
