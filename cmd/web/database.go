@@ -5,10 +5,9 @@ import (
 	"fmt"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/janek2j/website-go/pkg/config"
 )
 
-var appCfg *config.AppConfig
+// var appCfg *config.AppConfig
 
 func DBProcessFromAppConfig() {
 	// db := config.AppConfig.Db

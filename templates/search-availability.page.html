@@ -1,0 +1,75 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1 class="mt-5">Sprawdź dostępność</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <!-- <button type="button" class="btn btn-success">Wypożycz teraz</button> -->
+
+            <!-- <a href="/borrow" class="btn btn-success">Sprawdź dostępność</a> -->
+        </div>
+    </div>
+
+    <!-- <form action="/make-reservation" method="POST" novalidate class="needs-validation">
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-3 form-group">
+                <label for="start_date" class="form-label">Data początkowa</label>
+                <input required type="date" name="start_date" class="form-control" id="startDate"
+                    aria-describedby="startDateHelp">
+                <div id="startDateHelp" class="form-text">Wpisz datę początkową w formacie DD.MM.RRRR</div>
+            </div>
+
+            <div class="col-3 form-group">
+                <label for="end_date" class="form-label">Data końcowa</label>
+                <input required type="date" name="end_date" class="form-control" id="endDate"
+                    aria-describedby="endDateHelp">
+                <div id="endDateHelp" class="form-text">Wpisz datę końcową w formacie DD.MM.RRRR</div>
+            </div>
+        </div>
+        <div class="row">
+            <hr>
+            <div class="col mt-3">
+                <button type="submit" class="btn btn-primary">Sprawdź dostępność</button>
+            </div>
+        </div>
+    </form> -->
+
+    <form action="/search-availability" method="POST" novalidate class="needs-validation">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div id="reservation-dates" class="row form-row">
+            <div class="col-3"></div>
+            <div class="col-3">
+                <input required type="text" name="start" class="form-control" placeholder="Data wypożyczenia">
+            </div>
+            <div class="col-3">
+                <input required type="text" name="end" class="form-control" placeholder="Data oddania">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Search availability</button>
+    </form>
+
+</div>
+
+
+<button id="colorButton">Color Button</button>
+{{end}}
+
+
+{{define "js"}}
+
+<script>
+    const elem = document.getElementById('reservation-dates');
+    const rangepicker = new DateRangePicker(elem, {
+        // ...options
+        format: "dd-mm-yyyy"
+    });
+
+</script>
+
+{{end}}
