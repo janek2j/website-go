@@ -1,28 +1,38 @@
 package render
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
 	"text/template"
 
-	"github.com/janek2j/website-go/pkg/config"
-	"github.com/janek2j/website-go/pkg/models"
+	"github.com/janek2j/website-go/internal/config"
+	"github.com/janek2j/website-go/internal/models"
+	"github.com/justinas/nosurf"
 )
 
 var app *config.AppConfig
+var pathToTemplates = "./templates"
 
-// NewTemplates sets the config for the template package
-func NewTemplates(a *config.AppConfig) {
+// NewRenderer sets the config for the template package
+func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
-func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+// AddDefaultData adds data for all templates
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	td.Flash = app.Session.PopString(r.Context(), "flash")
+	td.Error = app.Session.PopString(r.Context(), "error")
+	td.Warning = app.Session.PopString(r.Context(), "warning")
+
+	fmt.Println("Template data:\n", td)
+	td.CSRFToken = nosurf.Token(r)
 	return td
 }
 
-func RenderTemplate(w http.ResponseWriter, templateName string, tmplData *models.TemplateData) {
+func Template(w http.ResponseWriter, r *http.Request, templateName string, tmplData *models.TemplateData) {
 	var tmplCache map[string]*template.Template
 	var err error
 	if app.UseCache {
@@ -42,35 +52,25 @@ func RenderTemplate(w http.ResponseWriter, templateName string, tmplData *models
 	}
 
 	// for fine grained error checking
-	// buf := new(bytes.Buffer)
-	// err = tmpl.Execute(buf, nil)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	buf := new(bytes.Buffer)
 
-	// render the template
-	// _, err = buf.WriteTo(w)
-	// if err != nil {
-	// fmt.Println("error writing template to browser:", err)
-	// }
+	tmplData = AddDefaultData(tmplData, r)
 
-	err = tmpl.Execute(w, tmplData)
+	_ = tmpl.Execute(buf, tmplData)
+
+	// render the template in a browser
+	_, err = buf.WriteTo(w)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error writing template to browser:", err)
 	}
-
-	// parsedTemplate, _ := template.ParseFiles("./templates/"+templateName+".html", "./templates/base.layout.html")
-	// err = parsedTemplate.Execute(w, nil)
-	// if err != nil {
-	// 	log.Println("error passing template:", err)
-	// }
 }
 
+// CreateTemplateCache creates template cache as a map
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	tmplCache := map[string]*template.Template{}
 
 	// get all of the files named *.page.html from ./templates
-	pages, err := filepath.Glob("./templates/*.page.html")
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", pathToTemplates))
 	if err != nil {
 		return tmplCache, err
 	}
@@ -83,14 +83,14 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 			return tmplCache, err
 		}
 
-		matches, err := filepath.Glob("./templates/*.layout.html")
+		matches, err := filepath.Glob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 		if err != nil {
 			return tmplCache, err
 		}
 
 		// combines .page template with .layout template together
 		if len(matches) > 0 {
-			currentTemplate, err = currentTemplate.ParseGlob("./templates/*.layout.html")
+			currentTemplate, err = currentTemplate.ParseGlob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 			if err != nil {
 				fmt.Println(err)
 				return tmplCache, err
